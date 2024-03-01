@@ -20,19 +20,42 @@ def index():
 
 @app.route('/bakeries')
 def bakeries():
-    return ''
+    bakeries = Bakery.query.all()
+    response_data = {'bakeries': [bakery.to_dict() for bakery in bakeries]}
+    response = make_response(response_data, 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 @app.route('/bakeries/<int:id>')
 def bakery_by_id(id):
-    return ''
+    bakery = Bakery.query.get_or_404(id)
+    response_data = {'id': bakery.id, 'name': bakery.name, 'created_at': bakery.created_at}  # Include other attributes as needed
+    return make_response(jsonify(response_data), 200)
+
 
 @app.route('/baked_goods/by_price')
 def baked_goods_by_price():
-    return ''
+    baked_goods = BakedGood.query.order_by(BakedGood.price.desc()).all()
+    response_data = {'baked_goods': [baked_good.to_dict() for baked_good in baked_goods]}
+    response = make_response(response_data, 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+from flask import jsonify
 
 @app.route('/baked_goods/most_expensive')
 def most_expensive_baked_good():
-    return ''
+    baked_good = BakedGood.query.order_by(BakedGood.price.desc()).first()
+    if baked_good:
+        response_data = {
+            'name': baked_good.name,
+            'price': baked_good.price
+        }
+        return jsonify(response_data), 200
+    else:
+        return jsonify({'error': 'No baked goods found'}), 404
+
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
